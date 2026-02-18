@@ -1180,6 +1180,83 @@ body {
 .payment-entry .pay-date { color: var(--text-tertiary); font-size: 0.72rem; }
 .payment-entry .pay-note { color: var(--text-tertiary); font-size: 0.72rem; }
 
+/* ─── Payment Attachment ─── */
+.attach-upload-area {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.attach-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  background: var(--bg);
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  align-self: flex-start;
+}
+
+.attach-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.attach-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-sm);
+}
+
+.attach-preview-img {
+  max-width: 100%;
+  max-height: 160px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  object-fit: contain;
+}
+
+.attach-clear-btn {
+  padding: 4px 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.attach-clear-btn:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+/* Thumbnail shown in transaction history */
+.pay-attach-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 1px solid var(--border-light);
+  flex-shrink: 0;
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.pay-attach-thumb:hover {
+  transform: scale(1.2);
+  border-color: var(--accent);
+}
+
 /* ─── Segmented Tab Control ─── */
 .charge-tabs,
 .calc-tabs {

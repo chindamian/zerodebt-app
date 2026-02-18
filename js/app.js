@@ -15,6 +15,7 @@ let loans = [];
 let activeTab = "all";
 let editingId = null;
 let paymentLoanId = null;
+let paymentAttachmentData = null;
 let chargeLoanId = null;
 let calcLoanId = null;
 let summaryFilters = {}; // { credit_card: true, housing: true, ... }
@@ -149,6 +150,25 @@ function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str || "";
   return div.innerHTML;
+}
+
+function compressImage(dataURL, maxDim, quality, callback) {
+  const img = new Image();
+  img.onload = function() {
+    const ratio = Math.min(maxDim / img.width, maxDim / img.height, 1);
+    const w = Math.round(img.width * ratio);
+    const h = Math.round(img.height * ratio);
+    const canvas = document.createElement("canvas");
+    canvas.width = w; canvas.height = h;
+    canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+    callback(canvas.toDataURL("image/jpeg", quality));
+  };
+  img.src = dataURL;
+}
+
+function openAttachment(src) {
+  const w = window.open();
+  w.document.write('<body style="margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;"><img src="' + src + '" style="max-width:100%;max-height:100vh;object-fit:contain;border-radius:8px;"></body>');
 }
 
 // ── Animated close helper ──
@@ -992,6 +1012,9 @@ function openPaymentModal(id) {
   if (!loan) return;
 
   document.getElementById("payment-form").reset();
+  paymentAttachmentData = null;
+  document.getElementById("payment-attachment").value = "";
+  document.getElementById("payment-attach-preview").innerHTML = "";
   const name = loan.nickname || loan.lenderName || loan.bank || "Loan";
   document.getElementById("payment-title").textContent = "Pay: " + name;
   document.getElementById("payment-loan-info").innerHTML =
@@ -1017,11 +1040,13 @@ function handlePayment(e) {
 
   loan.balance = Math.max(0, Number(loan.balance) - amount);
   if (!loan.history) loan.history = [];
-  loan.history.push({
+  const entry = {
     type: "payment", amount, note,
     date: new Date().toISOString(),
     balanceAfter: loan.balance
-  });
+  };
+  if (paymentAttachmentData) entry.attachment = paymentAttachmentData;
+  loan.history.push(entry);
 
   save();
   closePaymentModal();
@@ -1044,7 +1069,10 @@ function renderPaymentHistory(loan) {
           '<span class="' + amountClass + '">' + sign + formatPHP(entry.amount) + '</span>' +
           (entry.note ? ' <span class="pay-note">' + escapeHtml(entry.note) + '</span>' : '') +
         '</div>' +
-        '<div><span class="pay-date">' + formatDate(entry.date) + '</span></div>' +
+        '<div style="display:flex;align-items:center;gap:6px;">' +
+          (entry.attachment ? '<img src="' + entry.attachment + '" class="pay-attach-thumb" title="View receipt" onclick="openAttachment(this.src)">' : '') +
+          '<span class="pay-date">' + formatDate(entry.date) + '</span>' +
+        '</div>' +
       '</div>';
   });
   container.innerHTML = html;
@@ -1744,6 +1772,29 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.target === e.currentTarget) closePaymentModal();
   });
   document.getElementById("payment-form").addEventListener("submit", handlePayment);
+  document.getElementById("payment-attach-btn").addEventListener("click", () => {
+    document.getElementById("payment-attachment").click();
+  });
+  document.getElementById("payment-attachment").addEventListener("change", function() {
+    const file = this.files[0];
+    const preview = document.getElementById("payment-attach-preview");
+    if (!file) { paymentAttachmentData = null; preview.innerHTML = ""; return; }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      compressImage(e.target.result, 1200, 0.72, function(compressed) {
+        paymentAttachmentData = compressed;
+        preview.innerHTML =
+          '<img src="' + compressed + '" class="attach-preview-img">' +
+          '<button type="button" class="attach-clear-btn" id="payment-attach-clear">Remove</button>';
+        document.getElementById("payment-attach-clear").addEventListener("click", () => {
+          paymentAttachmentData = null;
+          document.getElementById("payment-attachment").value = "";
+          preview.innerHTML = "";
+        });
+      });
+    };
+    reader.readAsDataURL(file);
+  });
 
   // Charge modal
   document.getElementById("charge-close").addEventListener("click", closeChargeModal);

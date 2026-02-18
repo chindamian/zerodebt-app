@@ -215,6 +215,14 @@
           <label for="payment-note">Note (optional)</label>
           <input type="text" id="payment-note" placeholder="e.g. Feb partial payment">
         </div>
+        <div class="form-group">
+          <label>Receipt / Screenshot (optional)</label>
+          <div class="attach-upload-area">
+            <input type="file" id="payment-attachment" accept="image/*" style="display:none">
+            <button type="button" class="attach-btn" id="payment-attach-btn">Attach Screenshot</button>
+            <div id="payment-attach-preview" class="attach-preview"></div>
+          </div>
+        </div>
         <button type="submit" class="form-submit" style="background:#28a745;">Record Payment</button>
       </form>
       <div id="payment-history" class="payment-history"></div>

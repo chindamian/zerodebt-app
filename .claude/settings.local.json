@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.moneymax.ph)",
+      "WebFetch(domain:www.bsp.gov.ph)",
+      "WebSearch",
+      "Bash(start \"\" \"C:/Users/DamianChin/Documents/Utang Tracker/index.html\")"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "notion"
+  ]
+}

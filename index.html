@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZeroDebt</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <h1><span>₱</span> ZeroDebt</h1>
+  </header>
+
+  <!-- Total Debt Summary -->
+  <section class="summary">
+    <div class="summary-total">
+      <small>Remaining Debt</small>
+      <span id="summary-total">₱0.00</span>
+    </div>
+    <div class="summary-payoff" id="summary-payoff"></div>
+    <div class="summary-filter" id="summary-filter"></div>
+    <div class="summary-breakdown" id="summary-breakdown">
+      <span class="summary-chip">No loans added yet</span>
+    </div>
+  </section>
+
+  <!-- Disclaimer -->
+  <div class="app-disclaimer">Estimates only, not financial advice. Actual bank computations may differ.</div>
+
+  <!-- Tabs -->
+  <nav class="tabs" id="tabs"></nav>
+
+  <!-- Accrual Notification Banner -->
+  <div class="accrual-banner" id="accrual-banner" style="display:none;">
+    <span id="accrual-banner-text"></span>
+    <button class="accrual-banner-close" id="accrual-banner-close">&times;</button>
+  </div>
+
+  <!-- Loan List -->
+  <main class="loan-list" id="loan-list"></main>
+
+  <!-- FAB -->
+  <button class="fab" id="fab" title="Add Loan">+</button>
+
+  <!-- Add/Edit Loan Modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-title">
+        <span id="modal-title-text">Add Loan</span>
+        <button class="modal-close" id="modal-close">&times;</button>
+      </div>
+
+      <form id="loan-form">
+        <div class="form-group">
+          <label for="loan-type">Loan Type</label>
+          <select id="loan-type">
+            <option value="credit_card">Credit Card</option>
+            <option value="personal">Personal Loan</option>
+          </select>
+        </div>
+
+        <!-- Credit Card Fields -->
+        <div id="cc-fields">
+          <div class="form-group">
+            <label for="loan-bank">Bank</label>
+            <select id="loan-bank">
+              <option value="">-- Select Bank --</option>
+            </select>
+          </div>
+
+          <div class="bank-info-box" id="bank-info" style="display:none;"></div>
+
+          <div class="form-group">
+            <label for="loan-nickname">Card Nickname (optional)</label>
+            <input type="text" id="loan-nickname" placeholder="e.g. BDO Gold">
+          </div>
+
+          <div class="form-group">
+            <label for="loan-balance">Outstanding Balance (₱)</label>
+            <input type="number" id="loan-balance" step="0.01" min="0" placeholder="0.00">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="loan-interest-rate">Interest Rate (%/mo)</label>
+              <input type="number" id="loan-interest-rate" step="0.01" min="0" placeholder="2.00">
+              <span class="field-hint">Confirm this matches your statement.</span>
+            </div>
+            <div class="form-group">
+              <label for="loan-monthly-pay">Monthly Payment (₱)</label>
+              <input type="number" id="loan-monthly-pay" step="0.01" min="0" placeholder="0.00">
+              <span class="field-hint">Minimum or desired amount you pay each month.</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="loan-credit-limit">Credit Limit (₱)</label>
+              <input type="number" id="loan-credit-limit" step="0.01" min="0" placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label for="loan-due-date">Due Date (day)</label>
+              <input type="number" id="loan-due-date" min="1" max="31" placeholder="15">
+            </div>
+          </div>
+
+          <!-- Installment Section -->
+          <div class="form-section-label">Installment Loans (optional)</div>
+          <div id="installments-list"></div>
+          <button type="button" class="btn-add-installment" id="btn-add-installment">+ Add Installment</button>
+        </div>
+
+        <!-- Other Loan Fields -->
+        <div id="other-fields" style="display:none;">
+          <div class="form-group">
+            <label for="loan-lender">Lender / Bank Name</label>
+            <input type="text" id="loan-lender" placeholder="e.g. BPI, SSS, Pag-IBIG">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="loan-total-amount">Total Loan Amount (₱)</label>
+              <input type="number" id="loan-total-amount" step="0.01" min="0" placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label for="loan-balance-other">Outstanding Balance (₱)</label>
+              <input type="number" id="loan-balance-other" step="0.01" min="0" placeholder="0.00">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="loan-monthly-payment">Monthly Payment (₱)</label>
+              <input type="number" id="loan-monthly-payment" step="0.01" min="0" placeholder="0.00">
+              <span class="field-hint">Minimum or desired amount you pay each month.</span>
+            </div>
+            <div class="form-group">
+              <label for="loan-rate-other">Interest Rate (%/mo)</label>
+              <input type="number" id="loan-rate-other" step="0.01" min="0" placeholder="0.00">
+              <span class="field-hint">Confirm this matches your statement.</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="loan-term">Loan Term</label>
+              <select id="loan-term">
+                <option value="">-- Select Term --</option>
+                <option value="1">1 month</option>
+                <option value="2">2 months</option>
+                <option value="3">3 months</option>
+                <option value="4">4 months</option>
+                <option value="5">5 months</option>
+                <option value="6">6 months</option>
+                <option value="7">7 months</option>
+                <option value="8">8 months</option>
+                <option value="9">9 months</option>
+                <option value="10">10 months</option>
+                <option value="11">11 months</option>
+                <option value="12">12 months</option>
+                <option value="13">13 months</option>
+                <option value="14">14 months</option>
+                <option value="15">15 months</option>
+                <option value="16">16 months</option>
+                <option value="17">17 months</option>
+                <option value="18">18 months</option>
+                <option value="19">19 months</option>
+                <option value="20">20 months</option>
+                <option value="21">21 months</option>
+                <option value="22">22 months</option>
+                <option value="23">23 months</option>
+                <option value="24">24 months</option>
+                <option value="25">25 months</option>
+                <option value="26">26 months</option>
+                <option value="27">27 months</option>
+                <option value="28">28 months</option>
+                <option value="29">29 months</option>
+                <option value="30">30 months</option>
+                <option value="31">31 months</option>
+                <option value="32">32 months</option>
+                <option value="33">33 months</option>
+                <option value="34">34 months</option>
+                <option value="35">35 months</option>
+                <option value="36">36 months</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="loan-due-date-other">Due Date (day)</label>
+              <input type="number" id="loan-due-date-other" min="1" max="31" placeholder="15">
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="form-submit">Save Loan</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div class="modal-overlay" id="payment-overlay">
+    <div class="modal">
+      <div class="modal-title">
+        <span id="payment-title">Make Payment</span>
+        <button class="modal-close" id="payment-close">&times;</button>
+      </div>
+      <div id="payment-loan-info" class="bank-info-box"></div>
+      <form id="payment-form">
+        <div class="form-group">
+          <label for="payment-amount">Payment Amount (₱)</label>
+          <input type="number" id="payment-amount" step="0.01" min="0.01" placeholder="0.00" required>
+        </div>
+        <div class="form-group">
+          <label for="payment-note">Note (optional)</label>
+          <input type="text" id="payment-note" placeholder="e.g. Feb partial payment">
+        </div>
+        <button type="submit" class="form-submit" style="background:#28a745;">Record Payment</button>
+      </form>
+      <div id="payment-history" class="payment-history"></div>
+    </div>
+  </div>
+
+  <!-- Add Charge Modal -->
+  <div class="modal-overlay" id="charge-overlay">
+    <div class="modal">
+      <div class="modal-title">
+        <span id="charge-title">Add Charge</span>
+        <button class="modal-close" id="charge-close">&times;</button>
+      </div>
+      <div id="charge-loan-info" class="bank-info-box"></div>
+
+      <div class="charge-tabs">
+        <button class="charge-tab active" data-charge="regular">Regular Charge</button>
+        <button class="charge-tab" data-charge="installment">New Installment</button>
+      </div>
+
+      <!-- Regular charge -->
+      <form id="charge-form" class="charge-section">
+        <div class="form-group">
+          <label for="charge-amount">Charge Amount (₱)</label>
+          <input type="number" id="charge-amount" step="0.01" min="0.01" placeholder="0.00" required>
+        </div>
+        <div class="form-group">
+          <label for="charge-note">Description (optional)</label>
+          <input type="text" id="charge-note" placeholder="e.g. Groceries, Online purchase">
+        </div>
+        <button type="submit" class="form-submit" style="background:var(--red);">Add to Balance</button>
+      </form>
+
+      <!-- New installment -->
+      <form id="charge-installment-form" class="charge-section" style="display:none;">
+        <div class="form-group">
+          <label for="charge-inst-name">Item / Description</label>
+          <input type="text" id="charge-inst-name" placeholder="e.g. iPhone 15, Laptop" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="charge-inst-monthly">Monthly Amount (₱)</label>
+            <input type="number" id="charge-inst-monthly" step="0.01" min="0.01" placeholder="0.00" required>
+          </div>
+          <div class="form-group">
+            <label for="charge-inst-months">Total Months</label>
+            <input type="number" id="charge-inst-months" min="1" placeholder="e.g. 12" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="charge-inst-paid">Months Already Paid</label>
+          <input type="number" id="charge-inst-paid" min="0" value="0" placeholder="0">
+        </div>
+        <button type="submit" class="form-submit" style="background:var(--red);">Add Installment</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Payoff Calculator Modal -->
+  <div class="modal-overlay" id="calc-overlay">
+    <div class="modal">
+      <div class="modal-title">
+        <span id="calc-title">Payoff Calculator</span>
+        <button class="modal-close" id="calc-close">&times;</button>
+      </div>
+      <div id="calc-loan-info" class="bank-info-box"></div>
+
+      <div class="calc-tabs">
+        <button class="calc-tab active" data-calc="months">How long to pay off?</button>
+        <button class="calc-tab" data-calc="amount">How much to pay?</button>
+      </div>
+
+      <!-- Mode 1: Given monthly payment, how many months? -->
+      <div id="calc-months-section" class="calc-section">
+        <div class="form-group">
+          <label for="calc-monthly">If I pay this much per month (₱)</label>
+          <input type="number" id="calc-monthly" step="0.01" min="0.01" placeholder="0.00">
+        </div>
+        <button type="button" class="form-submit" id="calc-months-btn">Calculate</button>
+        <div id="calc-months-result" class="calc-result"></div>
+      </div>
+
+      <!-- Mode 2: Given target months, how much per month? -->
+      <div id="calc-amount-section" class="calc-section" style="display:none;">
+        <div class="form-group">
+          <label for="calc-target-months">I want to finish paying in (months)</label>
+          <input type="number" id="calc-target-months" min="1" placeholder="e.g. 3">
+        </div>
+        <button type="button" class="form-submit" id="calc-amount-btn">Calculate</button>
+        <div id="calc-amount-result" class="calc-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payoff Plan Modal -->
+  <div class="modal-overlay" id="plan-overlay">
+    <div class="modal">
+      <div class="modal-title">
+        <span id="plan-title">Payoff Plan</span>
+        <button class="modal-close" id="plan-close">&times;</button>
+      </div>
+      <div id="plan-loan-info" class="bank-info-box"></div>
+      <div id="plan-strategies"></div>
+      <h4 class="plan-table-title">6-Cycle Projection</h4>
+      <div class="plan-table-tabs" id="plan-table-tabs"></div>
+      <div id="plan-table"></div>
+    </div>
+  </div>
+
+  <!-- Export Modal -->
+  <div class="modal-overlay" id="export-overlay">
+    <div class="modal">
+      <div class="modal-title">
+        <span id="export-title">Export</span>
+        <button class="modal-close" id="export-close">&times;</button>
+      </div>
+      <div id="export-card-info" class="bank-info-box"></div>
+      <div class="export-options">
+        <button class="export-option" id="export-pdf">
+          <div class="export-option-icon">📄</div>
+          <div class="export-option-info">
+            <div class="export-option-label">PDF Report</div>
+            <div class="export-option-desc">Formatted summary, projections &amp; history</div>
+          </div>
+          <span class="export-option-arrow">›</span>
+        </button>
+        <button class="export-option" id="export-csv">
+          <div class="export-option-icon">📊</div>
+          <div class="export-option-info">
+            <div class="export-option-label">CSV Spreadsheet</div>
+            <div class="export-option-desc">Transaction history as table</div>
+          </div>
+          <span class="export-option-arrow">›</span>
+        </button>
+        <button class="export-option" id="export-json">
+          <div class="export-option-icon">💾</div>
+          <div class="export-option-info">
+            <div class="export-option-label">JSON Backup</div>
+            <div class="export-option-desc">Full data for restore or import</div>
+          </div>
+          <span class="export-option-arrow">›</span>
+        </button>
+      </div>
+      <p class="export-disclaimer">Estimates only. Not financial advice. All data is stored locally on your device.</p>
+    </div>
+  </div>
+
+  <!-- Delete Confirm -->
+  <div class="confirm-overlay" id="confirm-overlay">
+    <div class="confirm-box">
+      <p>Delete this loan?</p>
+      <div class="confirm-actions">
+        <button id="confirm-no">Cancel</button>
+        <button id="confirm-yes" class="btn-confirm-yes">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/banks.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

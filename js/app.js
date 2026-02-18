@@ -1,3 +1,6 @@
+// Capacitor back button (no-op in browser, active in native)
+const { App: CapApp } = window.Capacitor?.Plugins || {};
+
 const STORAGE_KEY = "utang_tracker_loans";
 const FILTER_KEY = "utang_tracker_filters";
 const ACCRUAL_KEY = "utang_tracker_last_accrual";
@@ -53,6 +56,14 @@ function saveFilters() {
   localStorage.setItem(FILTER_KEY, JSON.stringify(summaryFilters));
 }
 
+function saveAccrual(ym) {
+  localStorage.setItem(ACCRUAL_KEY, ym);
+}
+
+function loadAccrual() {
+  return localStorage.getItem(ACCRUAL_KEY);
+}
+
 // ── Monthly Auto-Accrual ──
 
 function getCurrentYearMonth() {
@@ -70,11 +81,11 @@ function monthsDiff(fromYM, toYM) {
 
 function processMonthlyAccruals() {
   const currentYM = getCurrentYearMonth();
-  let lastYM = localStorage.getItem(ACCRUAL_KEY);
+  let lastYM = loadAccrual();
 
   // First time: set to current month, no retroactive charges
   if (!lastYM) {
-    localStorage.setItem(ACCRUAL_KEY, currentYM);
+    saveAccrual(currentYM);
     return 0;
   }
 
@@ -134,7 +145,7 @@ function processMonthlyAccruals() {
   if (totalAccruals > 0) {
     save();
   }
-  localStorage.setItem(ACCRUAL_KEY, currentYM);
+  saveAccrual(currentYM);
   return missed;
 }
 
@@ -1504,6 +1515,25 @@ function closeConfirm() {
   animateClose("confirm-overlay", () => { pendingDeleteId = null; });
 }
 
+// ── Settings ──
+
+function openSettingsModal() {
+  document.getElementById("settings-clear-section").style.display = "";
+  document.getElementById("settings-clear-confirm").style.display = "none";
+  document.getElementById("settings-overlay").classList.add("active");
+}
+
+function closeSettingsModal() {
+  animateClose("settings-overlay");
+}
+
+function clearAllData() {
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(FILTER_KEY);
+  localStorage.removeItem(ACCRUAL_KEY);
+  location.reload();
+}
+
 function doDelete() {
   if (pendingDeleteId) {
     loans = loans.filter(l => l.id !== pendingDeleteId);
@@ -1869,5 +1899,31 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("export-json").addEventListener("click", () => {
     const loan = loans.find(l => l.id === exportLoanId);
     if (loan) exportAsJSON(loan);
+  });
+
+  // Settings modal
+  document.getElementById("settings-btn").addEventListener("click", openSettingsModal);
+  document.getElementById("settings-close").addEventListener("click", closeSettingsModal);
+  document.getElementById("settings-overlay").addEventListener("click", e => {
+    if (e.target === e.currentTarget) closeSettingsModal();
+  });
+  document.getElementById("btn-clear-data").addEventListener("click", () => {
+    document.getElementById("settings-clear-section").style.display = "none";
+    document.getElementById("settings-clear-confirm").style.display = "";
+  });
+  document.getElementById("btn-cancel-clear").addEventListener("click", () => {
+    document.getElementById("settings-clear-section").style.display = "";
+    document.getElementById("settings-clear-confirm").style.display = "none";
+  });
+  document.getElementById("btn-confirm-clear").addEventListener("click", clearAllData);
+
+  // Android hardware back button — close modals instead of exiting
+  document.addEventListener('backButton', (ev) => {
+    const openModal = document.querySelector('.modal-overlay.active');
+    if (openModal) {
+      ev.detail.register(10, () => {
+        animateClose(openModal.id);
+      });
+    }
   });
 });

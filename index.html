@@ -11,6 +11,7 @@
   <!-- Header -->
   <header class="header">
     <h1><span>₱</span> ZeroDebt</h1>
+    <button class="settings-btn" id="settings-btn" title="Settings" aria-label="Settings">⚙</button>
   </header>
 
   <!-- Total Debt Summary -->
@@ -27,7 +28,10 @@
   </section>
 
   <!-- Disclaimer -->
-  <div class="app-disclaimer">Estimates only, not financial advice. Actual bank computations may differ.</div>
+  <div class="app-disclaimer">
+    <span>Estimates only, not financial advice. Actual bank computations may differ.</span>
+    <span class="local-data-note">🔒 All data is stored locally on your device.</span>
+  </div>
 
   <!-- Tabs -->
   <nav class="tabs" id="tabs"></nav>
@@ -367,6 +371,38 @@
         </button>
       </div>
       <p class="export-disclaimer">Estimates only. Not financial advice. All data is stored locally on your device.</p>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settings-overlay">
+    <div class="modal">
+      <div class="modal-title">
+        <span>Settings</span>
+        <button class="modal-close" id="settings-close">&times;</button>
+      </div>
+      <div class="settings-body">
+        <div class="settings-local-note">
+          <span class="settings-local-icon">🔒</span>
+          <div>
+            <div class="settings-local-title">Local Storage Only</div>
+            <div class="settings-local-desc">All data is stored locally on your device. Nothing is sent to external servers, no accounts required, no cloud sync.</div>
+          </div>
+        </div>
+        <div class="settings-divider"></div>
+        <div class="settings-section-label">Danger Zone</div>
+        <div id="settings-clear-section">
+          <button class="btn-clear-data" id="btn-clear-data">Clear All Data</button>
+          <p class="settings-clear-hint">Permanently deletes all loans, payments, and history. Cannot be undone.</p>
+        </div>
+        <div id="settings-clear-confirm" style="display:none;">
+          <p class="settings-clear-warning">⚠ This will permanently delete ALL your data. This cannot be undone.</p>
+          <div class="settings-confirm-btns">
+            <button class="btn-cancel-clear" id="btn-cancel-clear">Cancel</button>
+            <button class="btn-confirm-clear" id="btn-confirm-clear">Yes, Delete Everything</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

@@ -521,11 +521,22 @@ function renderLoans() {
       var termMonths = parseInt(loan.loanTerm) || 0;
       var plMonthlyPay = Number(loan.monthlyPayment) || 0;
       if (termMonths > 0 && plMonthlyPay > 0) {
-        var paidMonthsCount = Math.min(termMonths, Math.floor(totalPaid / plMonthlyPay));
+        // Proportional fill per segment — based on total payments vs monthly target
         var plSegsHTML = "";
         for (var si = 0; si < termMonths; si++) {
-          plSegsHTML += '<div class="pl-seg' + (si < paidMonthsCount ? " paid" : "") + '"></div>';
+          var plSegStart = si * plMonthlyPay;
+          var plSegEnd = (si + 1) * plMonthlyPay;
+          var plFillPct;
+          if (totalPaid >= plSegEnd) {
+            plFillPct = 100;
+          } else if (totalPaid <= plSegStart) {
+            plFillPct = 0;
+          } else {
+            plFillPct = Math.min(100, ((totalPaid - plSegStart) / plMonthlyPay) * 100);
+          }
+          plSegsHTML += '<div class="pl-seg"><div class="pl-seg-fill" style="width:' + plFillPct.toFixed(1) + '%"></div></div>';
         }
+        var paidMonthsCount = Math.min(termMonths, Math.floor(totalPaid / plMonthlyPay));
         personalProgressHTML =
           '<div class="pl-progress-section">' +
             '<div class="pl-progress-header">' +
@@ -550,8 +561,6 @@ function renderLoans() {
       const debtPct = startBal > 0 ? Math.min(100, Math.round((paidDown / startBal) * 100)) : 100;
       const targetDate = formatPayoffDate(new Date(loan.goal.targetDate));
       const totalSegs = loan.goal.targetMonths;
-      const perSeg = startBal / totalSegs;
-      const debtSegs = Math.min(totalSegs, Math.floor(paidDown / perSeg));
       const goalComplete = remainingDebt <= 0;
 
       // Count due date cycles elapsed since goal was set
@@ -569,23 +578,22 @@ function renderLoans() {
         checkDate.setMonth(checkDate.getMonth() + 1);
       }
 
-      // Completed segments: due date passed AND debt reduced enough
-      var completedSegs = goalComplete ? totalSegs : Math.min(debtSegs, cyclesElapsed);
-      // Prefunded segments: debt reduced ahead of due dates
-      var prefundedSegs = goalComplete ? 0 : Math.max(0, debtSegs - cyclesElapsed);
-
+      // Proportional segment fill — each segment represents one goal cycle payment
+      // Fill is based on balance reduction (debt-elimination logic), not raw payments
+      var goalSegTarget = Number(loan.goal.monthlyPayment);
       let segsHTML = '';
-      if (goalComplete) {
-        for (let i = 0; i < totalSegs; i++) {
-          segsHTML += '<div class="goal-seg completed"></div>';
+      for (let i = 0; i < totalSegs; i++) {
+        var gSegStart = i * goalSegTarget;
+        var gSegEnd = (i + 1) * goalSegTarget;
+        var gFillPct;
+        if (goalComplete || paidDown >= gSegEnd) {
+          gFillPct = 100;
+        } else if (paidDown <= gSegStart) {
+          gFillPct = 0;
+        } else {
+          gFillPct = Math.min(100, ((paidDown - gSegStart) / goalSegTarget) * 100);
         }
-      } else {
-        for (let i = 0; i < totalSegs; i++) {
-          var segClass = 'goal-seg';
-          if (i < completedSegs) segClass += ' completed';
-          else if (i < completedSegs + prefundedSegs) segClass += ' prefunded';
-          segsHTML += '<div class="' + segClass + '"></div>';
-        }
+        segsHTML += '<div class="goal-seg"><div class="goal-seg-fill" style="width:' + gFillPct.toFixed(1) + '%"></div></div>';
       }
 
       // Goal cycle breakdown (uses simulatePayoff)

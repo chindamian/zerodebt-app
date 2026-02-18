@@ -2,7 +2,12 @@
 const { App: CapApp } = window.Capacitor?.Plugins || {};
 
 const isNative = !!(window.Capacitor?.isNativePlatform?.());
-const NativeBiometric = isNative ? window.Capacitor.registerPlugin('NativeBiometric') : null;
+let NativeBiometric = null;
+try {
+  if (isNative && typeof window.Capacitor.registerPlugin === 'function') {
+    NativeBiometric = window.Capacitor.registerPlugin('NativeBiometric');
+  }
+} catch (e) { /* plugin not available */ }
 const APP_LOCK_KEY = "utang_tracker_app_lock";
 
 const STORAGE_KEY = "utang_tracker_loans";

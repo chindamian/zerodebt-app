@@ -1,6 +1,6 @@
 {
-  "appId": "com.damian.utangtracker",
-  "appName": "Utang Tracker",
+  "appId": "com.damian.bayadna",
+  "appName": "BayadNa",
   "webDir": "www",
   "android": {
     "backgroundColor": "#1a2332"

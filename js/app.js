@@ -1565,8 +1565,8 @@ async function promptBiometric() {
   if (!NativeBiometric) return false;
   try {
     await NativeBiometric.verifyIdentity({
-      reason: "Unlock Utang Tracker",
-      title: "Utang Tracker",
+      reason: "Unlock BayadNa",
+      title: "BayadNa",
       subtitle: "Verify your identity",
       negativeButtonText: "Cancel"
     });

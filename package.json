@@ -1,7 +1,7 @@
 {
-  "name": "utang-tracker",
+  "name": "bayadna",
   "version": "1.0.0",
-  "description": "Philippine debt tracker - Utang Tracker",
+  "description": "Philippine debt tracker - BayadNa",
   "scripts": {
     "build": "node scripts/build.js",
     "sync": "node scripts/build.js && npx cap sync android",

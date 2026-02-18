@@ -1,0 +1,8 @@
+{
+  "appId": "com.damian.utangtracker",
+  "appName": "Utang Tracker",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#1a2332"
+  }
+}

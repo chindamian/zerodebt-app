@@ -1,6 +1,10 @@
 // Capacitor back button (no-op in browser, active in native)
 const { App: CapApp } = window.Capacitor?.Plugins || {};
 
+const isNative = !!(window.Capacitor?.isNativePlatform?.());
+const NativeBiometric = isNative ? window.Capacitor.registerPlugin('NativeBiometric') : null;
+const APP_LOCK_KEY = "utang_tracker_app_lock";
+
 const STORAGE_KEY = "utang_tracker_loans";
 const FILTER_KEY = "utang_tracker_filters";
 const ACCRUAL_KEY = "utang_tracker_last_accrual";
@@ -1520,7 +1524,7 @@ function closeConfirm() {
 function openSettingsModal() {
   document.getElementById("settings-clear-section").style.display = "";
   document.getElementById("settings-clear-confirm").style.display = "none";
-  document.getElementById("settings-overlay").classList.add("active");
+  document.getElementById("settings-overlay").classList.add("open");
 }
 
 function closeSettingsModal() {
@@ -1531,7 +1535,53 @@ function clearAllData() {
   localStorage.removeItem(STORAGE_KEY);
   localStorage.removeItem(FILTER_KEY);
   localStorage.removeItem(ACCRUAL_KEY);
+  localStorage.removeItem(APP_LOCK_KEY);
   location.reload();
+}
+
+// ── App Lock / Biometrics ──
+
+function isAppLockEnabled() {
+  return localStorage.getItem(APP_LOCK_KEY) === "true";
+}
+
+function showLockScreen() {
+  document.getElementById("lock-screen").style.display = "flex";
+}
+
+function hideLockScreen() {
+  document.getElementById("lock-screen").style.display = "none";
+}
+
+async function isBiometricAvailable() {
+  if (!NativeBiometric) return false;
+  try {
+    const result = await NativeBiometric.isAvailable();
+    return !!result.isAvailable;
+  } catch { return false; }
+}
+
+async function promptBiometric() {
+  if (!NativeBiometric) return false;
+  try {
+    await NativeBiometric.verifyIdentity({
+      reason: "Unlock Utang Tracker",
+      title: "Utang Tracker",
+      subtitle: "Verify your identity",
+      negativeButtonText: "Cancel"
+    });
+    return true;
+  } catch { return false; }
+}
+
+async function tryUnlock() {
+  document.getElementById("lock-hint").textContent = "";
+  const success = await promptBiometric();
+  if (success) {
+    hideLockScreen();
+  } else {
+    document.getElementById("lock-hint").textContent = "Authentication failed. Tap to try again.";
+  }
 }
 
 function doDelete() {
@@ -1901,6 +1951,33 @@ document.addEventListener("DOMContentLoaded", () => {
     if (loan) exportAsJSON(loan);
   });
 
+  // App lock
+  if (isAppLockEnabled() && isNative) { showLockScreen(); tryUnlock(); }
+  document.getElementById("lock-unlock-btn").addEventListener("click", tryUnlock);
+
+  // App lock toggle
+  const appLockToggle = document.getElementById("app-lock-toggle");
+  appLockToggle.checked = isAppLockEnabled();
+  appLockToggle.addEventListener("change", async () => {
+    if (appLockToggle.checked) {
+      const available = await isBiometricAvailable();
+      if (!available) {
+        appLockToggle.checked = false;
+        document.getElementById("app-lock-unavailable").style.display = "";
+        return;
+      }
+      const confirmed = await promptBiometric();
+      if (confirmed) {
+        localStorage.setItem(APP_LOCK_KEY, "true");
+        document.getElementById("app-lock-unavailable").style.display = "none";
+      } else {
+        appLockToggle.checked = false;
+      }
+    } else {
+      localStorage.setItem(APP_LOCK_KEY, "false");
+    }
+  });
+
   // Settings modal
   document.getElementById("settings-btn").addEventListener("click", openSettingsModal);
   document.getElementById("settings-close").addEventListener("click", closeSettingsModal);
@@ -1919,7 +1996,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Android hardware back button — close modals instead of exiting
   document.addEventListener('backButton', (ev) => {
-    const openModal = document.querySelector('.modal-overlay.active');
+    const openModal = document.querySelector('.modal-overlay.open');
     if (openModal) {
       ev.detail.register(10, () => {
         animateClose(openModal.id);

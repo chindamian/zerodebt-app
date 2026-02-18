@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZeroDebt</title>
+  <title>Utang Tracker</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
   <!-- Header -->
   <header class="header">
-    <h1><span>₱</span> ZeroDebt</h1>
+    <h1><span>₱</span> Utang Tracker</h1>
     <button class="settings-btn" id="settings-btn" title="Settings" aria-label="Settings">⚙</button>
   </header>
 
@@ -390,6 +390,20 @@
           </div>
         </div>
         <div class="settings-divider"></div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-title">App Lock</div>
+            <div class="settings-row-desc">Require fingerprint or PIN to open Utang Tracker. Only works on device, not browser preview.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="app-lock-toggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <p class="app-lock-unavailable" id="app-lock-unavailable" style="display:none;">
+          ⚠ Biometrics not available on this device or emulator.
+        </p>
+        <div class="settings-divider"></div>
         <div class="settings-section-label">Danger Zone</div>
         <div id="settings-clear-section">
           <button class="btn-clear-data" id="btn-clear-data">Clear All Data</button>
@@ -415,6 +429,17 @@
         <button id="confirm-yes" class="btn-confirm-yes">Delete</button>
       </div>
     </div>
+  </div>
+
+  <!-- Lock Screen -->
+  <div id="lock-screen" style="display:none;">
+    <div class="lock-logo"><span>₱</span> Utang Tracker</div>
+    <p class="lock-tagline">Your financial data is protected</p>
+    <button class="lock-btn" id="lock-unlock-btn">
+      <span class="lock-icon">👆</span>
+      <span>Tap to Unlock</span>
+    </button>
+    <p class="lock-hint" id="lock-hint"></p>
   </div>
 
   <script src="js/banks.js"></script>

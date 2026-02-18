@@ -1,0 +1,17 @@
+{
+  "name": "utang-tracker",
+  "version": "1.0.0",
+  "description": "Philippine debt tracker - Utang Tracker",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "sync": "node scripts/build.js && npx cap sync android",
+    "open": "npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.1.0",
+    "@capacitor/app": "^8.0.1",
+    "@capacitor/cli": "^8.1.0",
+    "@capacitor/core": "^8.1.0",
+    "@capgo/capacitor-native-biometric": "^8.3.7"
+  }
+}
